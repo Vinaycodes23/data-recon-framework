@@ -1,5 +1,9 @@
 # Data Reconciliation Framework
 
+[![CI](https://github.com/Vinaycodes23/data-recon-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/Vinaycodes23/data-recon-framework/actions/workflows/ci.yml)
+![Python 3.11 | 3.12](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 ![Demo: run the demo suite and open the results](docs/demo.gif)
 
 Compare a **source** dataset against a **target** dataset (a legacy DB vs. a new warehouse after a migration, say) and find missing rows, extra rows, duplicate keys, value mismatches, schema drift and aggregate drift. Define tests in YAML, run them from a CLI, Streamlit app, REST API or Airflow, and get a self-contained HTML report plus a run history. It runs fully on a laptop with seeded demo data; the connector design supports SQLite, Postgres, SQL Server, Snowflake, Redshift, S3 files, Salesforce and DynamoDB in production.
