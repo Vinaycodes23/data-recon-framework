@@ -373,7 +373,15 @@ def _check_aggregate(agg: Aggregate, src: pd.DataFrame, tgt: pd.DataFrame, opts:
     except ValueError as exc:
         out["error"] = str(exc)
         return out
-    out["source"], out["target"] = jsonable(sv), jsonable(tv)
+    return compare_aggregate_values(agg, sv, tv)
+
+
+def compare_aggregate_values(agg: Aggregate, sv: Any, tv: Any) -> dict[str, Any]:
+    """Compare one pair of aggregate values under ``agg.tolerance`` (shared by the pandas and pushdown paths)."""
+    out: dict[str, Any] = {
+        "column": agg.column, "func": agg.func, "tolerance": agg.tolerance,
+        "source": jsonable(sv), "target": jsonable(tv), "difference": None, "passed": False, "error": None,
+    }
     if sv is None or tv is None:
         out["passed"] = sv is None and tv is None
     elif isinstance(sv, (int, float, np.number)) and isinstance(tv, (int, float, np.number)):

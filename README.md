@@ -138,6 +138,22 @@ Machine: macOS-26.6.2-arm64-arm-64bit-Mach-O / arm / Python 3.13.5 / pandas 3.0.
 
 (Peak RSS is process-wide and cumulative across the sizes in one invocation. Re-run the script on your own machine; results vary.)
 
+## Scaling beyond memory
+
+**The row-level engine is in-memory pandas.** Measured with `scripts/benchmark.py`: 1,000,000 rows x 8 columns reconcile in 10.16 s (median) with a peak process RSS of 804 MB; 100,000 rows take 0.72 s. I have not benchmarked the row-level engine beyond 1M rows, and both tables must fit in RAM at once, so it is the wrong tool for tens of millions of rows on a laptop. What I would do, in order of effort:
+
+1. **Push aggregate checks down to the database (implemented).** `recon/pushdown.py` answers `sum / count / count_distinct / min / max / mean / null_count` with one `SELECT` per side, in the source database over SQLAlchemy or in DuckDB for parquet/csv, and compares the results with the same tolerance rule as the engine. Nothing is loaded into pandas. Measured with `scripts/benchmark_pushdown.py` (4 aggregates, results asserted equal to the pandas path):
+
+   | Source | Rows | Load into pandas + aggregate (s) | Pushdown (s) | Speedup |
+   |---|---:|---:|---:|---:|
+   | DuckDB on parquet | 1,000,000 | 1.02 | 0.199 | 5x |
+   | SQL on SQLite | 1,000,000 | 4.48 | 0.648 | 7x |
+   | DuckDB on parquet | 10,000,000 | 11.91 | 0.569 | 21x |
+
+   Caveats: it is a library function (`from recon.pushdown import pushdown_aggregates`), not yet wired into the YAML runner; it uses native SQL semantics (NULL is the only null, strings are not parsed as numbers); and it cannot find missing or mismatched rows.
+2. **Chunked / partitioned comparison by key range (not implemented).** The join is on keys, so both sides can be split into disjoint partitions (key ranges, or `hash(key) % N`), each pulled with a `WHERE` clause and run through the existing engine, then counts summed and samples capped. Memory is bounded by the partition size instead of the table size, and partitions can run in parallel. Duplicate-key and missing-row counts stay exact because a key always lands in the same partition on both sides.
+3. **DuckDB or Spark for 100M+ rows (not implemented).** Express the same pipeline as SQL: a full outer join on the keys, a row hash over the normalised columns to skip identical rows, then a column diff over the rows whose hashes differ. DuckDB does this out-of-core on one machine; Spark scales it across a cluster. The hash pre-filter and the normalisation rules carry over unchanged, only the execution engine changes.
+
 ## Deploying the Streamlit demo
 
 The app is deployable on Streamlit Community Cloud as is: `requirements.txt` holds runtime dependencies only (dev tools live in `requirements-dev.txt`), `.streamlit/config.toml` carries the settings, and on first start the app seeds the demo data itself. In the cloud, demo data, reports and the history DB are written under the system temp directory (set `RECON_CLOUD=1` to get the same behaviour elsewhere), so history resets when the app restarts. Pick Python 3.12 in the deploy dialog's Advanced settings.
