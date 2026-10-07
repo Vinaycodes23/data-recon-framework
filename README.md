@@ -1,8 +1,10 @@
 # Data Reconciliation Framework
 
+![Demo: run the demo suite and open the results](docs/demo.gif)
+
 Compare a **source** dataset against a **target** dataset (a legacy DB vs. a new warehouse after a migration, say) and find missing rows, extra rows, duplicate keys, value mismatches, schema drift and aggregate drift. Define tests in YAML, run them from a CLI, Streamlit app, REST API or Airflow, and get a self-contained HTML report plus a run history. It runs fully on a laptop with seeded demo data; the connector design supports SQLite, Postgres, SQL Server, Snowflake, Redshift, S3 files, Salesforce and DynamoDB in production.
 
-![architecture](#architecture) &nbsp;|&nbsp; Python 3.11+ · pandas · SQLAlchemy 2 · Streamlit · Flask · Airflow
+Python 3.11+ · pandas · SQLAlchemy 2 · Streamlit · Flask · Airflow
 
 ## Quickstart
 
@@ -14,28 +16,37 @@ make test                  # pytest + coverage
 
 `make seed` prints exactly which defects it planted; the integration test asserts the engine finds precisely those.
 
-> Screenshots: `docs/suite-builder.png` · `docs/results.png` · `docs/history.png` · `docs/report.png` *(placeholders, add your own captures)*
+## Screenshots
+
+| Suite Builder | Results |
+|---|---|
+| ![Suite Builder](docs/suite-builder.png) | ![Results](docs/results.png) |
+| **History** | **HTML report** |
+| ![History](docs/history.png) | ![HTML report](docs/report.png) |
+
+Regenerate them with `python scripts/capture_docs.py` (needs Playwright and ffmpeg).
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    Y[Suite YAML<br/>${ENV} secrets] --> C[config.py]
-    C --> R[runner.py<br/>ThreadPool, history DB]
-    subgraph Connectors [connectors - @register]
-      F[files: csv tsv xlsx parquet fwf sas json s3://]
-      S[sql: sqlite postgres mssql snowflake redshift]
-      A[saas: salesforce dynamodb]
+    Y["Suite YAML<br/>(secrets as env placeholders)"] --> C["config.py"]
+    C --> R["runner.py<br/>thread pool + history DB"]
+    subgraph CONN ["connectors (register decorator)"]
+        F["files: csv, tsv, xlsx, parquet, fwf, sas, json, s3"]
+        S["sql: sqlite, postgres, mssql, snowflake, redshift"]
+        A["saas: salesforce, dynamodb"]
     end
-    R --> Connectors --> E[engine.py<br/>align - normalise - join - hash - diff]
+    R --> CONN
+    CONN --> E["engine.py<br/>align, normalise, join, hash, diff"]
     E --> R
-    R --> J[JSON + HTML report]
-    R --> H[(history DB)]
-    CLI[python -m recon] --> R
-    UI[Streamlit app] --> R
-    API[Flask API] --> R
-    AF[Airflow DAG] --> R
-    CI[Jenkins] --> CLI
+    R --> J["JSON + HTML report"]
+    R --> H[("history DB")]
+    CLI["python -m recon"] --> R
+    UI["Streamlit app"] --> R
+    API["Flask API"] --> R
+    AF["Airflow DAG"] --> R
+    CI["Jenkins / GitHub Actions"] --> CLI
 ```
 
 ## Suite YAML reference

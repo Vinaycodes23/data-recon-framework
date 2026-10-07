@@ -7,3 +7,4 @@ s3fs
 simple-salesforce
 boto3
 apache-airflow
+playwright  # only for scripts/capture_docs.py (README screenshots)
