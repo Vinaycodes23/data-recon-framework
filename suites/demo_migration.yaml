@@ -1,0 +1,63 @@
+suite: demo_migration
+description: Legacy CRM (SQLite) vs new warehouse (Parquet / CSV / XLSX / fixed-width)
+tests:
+  - name: orders
+    source:
+      type: sqlite
+      url: "sqlite:///${DEMO_DATA_DIR:-demo_data}/legacy_crm.db"
+      query: "SELECT * FROM orders"
+    target:
+      type: parquet
+      path: "${DEMO_DATA_DIR:-demo_data}/warehouse/orders.parquet"
+    keys: [order_id]
+    column_map:
+      cust_id: customer_id
+    ignore_columns: [load_ts]
+    tolerance:
+      amount: 0.01
+    aggregates:
+      - {column: amount, func: sum, tolerance: 0.05}
+      - {column: order_id, func: count_distinct}
+  - name: customers
+    source:
+      type: sqlite
+      url: "sqlite:///${DEMO_DATA_DIR:-demo_data}/legacy_crm.db"
+      table: customers
+    target:
+      type: csv
+      path: "${DEMO_DATA_DIR:-demo_data}/warehouse/customers.csv"
+    keys: [customer_id]
+    options:
+      trim_strings: true
+      empty_string_as_null: true
+    aggregates:
+      - {column: customer_id, func: count}
+      - {column: email, func: null_count}
+  - name: products
+    source:
+      type: sqlite
+      url: "sqlite:///${DEMO_DATA_DIR:-demo_data}/legacy_crm.db"
+      table: products
+    target:
+      type: xlsx
+      path: "${DEMO_DATA_DIR:-demo_data}/warehouse/products.xlsx"
+    keys: [product_id]
+    tolerance:
+      price: 0.001
+    aggregates:
+      - {column: price, func: sum, tolerance: 0.01}
+  - name: payments
+    source:
+      type: sqlite
+      url: "sqlite:///${DEMO_DATA_DIR:-demo_data}/legacy_crm.db"
+      table: payments
+    target:
+      type: fwf
+      path: "${DEMO_DATA_DIR:-demo_data}/warehouse/payments.fwf"
+      widths: [8, 8, 12, 10, 10]
+      names: [payment_id, order_id, amount, method, paid_date]
+    keys: [payment_id]
+    tolerance:
+      amount: 0.005
+    aggregates:
+      - {column: amount, func: sum, tolerance: 0.01}
