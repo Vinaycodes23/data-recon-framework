@@ -149,3 +149,7 @@ Machine: macOS-26.6.2-arm64-arm-64bit-Mach-O / arm / Python 3.13.5 / pandas 3.0.
 * **Never-raise contract.** `run_test` converts every failure (bad connector, missing key, type error) into an `ERROR` result so one broken test cannot take down a suite; CI/Airflow distinguish ERROR from FAIL via exit codes.
 * **Pandas gotchas handled.** pandas 3 string dtype, NaN vs None vs NaT, `-0.0` vs `0.0` in hashes, float noise at tolerance boundaries, fixed-width numbers stored as zero-padded strings.
 * **Known limits.** Integers beyond 2^53 lose precision in numeric comparison; string keys that look numeric are matched numerically; duplicate keys keep the first row (flagged, not merged); the API runs synchronously.
+
+## License
+
+[MIT](LICENSE)
