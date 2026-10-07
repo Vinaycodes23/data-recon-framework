@@ -1,0 +1,9 @@
+# Cloud / warehouse connectors, imported lazily by recon.connectors
+snowflake-sqlalchemy
+sqlalchemy-redshift
+redshift-connector
+pyodbc
+s3fs
+simple-salesforce
+boto3
+apache-airflow
