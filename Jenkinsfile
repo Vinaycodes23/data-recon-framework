@@ -5,7 +5,7 @@ pipeline {
   stages {
     stage('Install') {
       steps {
-        sh 'python3 -m venv $VENV && $VENV/bin/pip install -q -r requirements.txt'
+        sh 'python3 -m venv $VENV && $VENV/bin/pip install -q -r requirements-dev.txt'
       }
     }
     stage('Lint') {

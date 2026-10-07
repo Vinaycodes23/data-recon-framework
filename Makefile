@@ -5,7 +5,7 @@ PIP ?= .venv/bin/pip
 
 install:
 	python3 -m venv .venv
-	$(PIP) install -q -r requirements.txt
+	$(PIP) install -q -r requirements-dev.txt
 
 seed:
 	$(PY) scripts/seed_demo.py

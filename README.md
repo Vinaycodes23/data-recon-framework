@@ -6,6 +6,8 @@
 
 ![Demo: run the demo suite and open the results](docs/demo.gif)
 
+**Live demo:** _coming soon_ <!-- replace with your https://<app-name>.streamlit.app URL after deploying -->
+
 Compare a **source** dataset against a **target** dataset (a legacy DB vs. a new warehouse after a migration, say) and find missing rows, extra rows, duplicate keys, value mismatches, schema drift and aggregate drift. Define tests in YAML, run them from a CLI, Streamlit app, REST API or Airflow, and get a self-contained HTML report plus a run history. It runs fully on a laptop with seeded demo data; the connector design supports SQLite, Postgres, SQL Server, Snowflake, Redshift, S3 files, Salesforce and DynamoDB in production.
 
 Python 3.11+ · pandas · SQLAlchemy 2 · Streamlit · Flask · Airflow
@@ -135,6 +137,10 @@ Machine: macOS-26.6.2-arm64-arm-64bit-Mach-O / arm / Python 3.13.5 / pandas 3.0.
 | 1,000,000 | 8 | 10.16 | 8.38 | 98,420 | 10,000 | 1,000 | 804 |
 
 (Peak RSS is process-wide and cumulative across the sizes in one invocation. Re-run the script on your own machine; results vary.)
+
+## Deploying the Streamlit demo
+
+The app is deployable on Streamlit Community Cloud as is: `requirements.txt` holds runtime dependencies only (dev tools live in `requirements-dev.txt`), `.streamlit/config.toml` carries the settings, and on first start the app seeds the demo data itself. In the cloud, demo data, reports and the history DB are written under the system temp directory (set `RECON_CLOUD=1` to get the same behaviour elsewhere), so history resets when the app restarts. Pick Python 3.12 in the deploy dialog's Advanced settings.
 
 ## Other pieces
 

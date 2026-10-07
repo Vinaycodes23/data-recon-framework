@@ -15,6 +15,7 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from apps import bootstrap  # noqa: E402
 from apps import ui_helpers as ui  # noqa: E402
 from recon import runner  # noqa: E402
 from recon.config import (  # noqa: E402
@@ -38,6 +39,15 @@ BLUE, ORANGE, AQUA, YELLOW = "#2a78d6", "#eb6834", "#1baf7a", "#eda100"
 STATUS_ICON = {"PASS": "✅ PASS", "FAIL": "❌ FAIL", "ERROR": "⚠️ ERROR"}
 
 st.set_page_config(page_title="Data Reconciliation", page_icon="🔍", layout="wide")
+
+
+@st.cache_resource(show_spinner="Preparing demo data (first start only)…")
+def _bootstrap() -> str:
+    """Seed demo data once per server process; in the cloud also redirect output to a temp dir."""
+    return str(bootstrap.ensure_demo_data())
+
+
+_bootstrap()
 
 
 # ------------------------------------------------------------------ shared
