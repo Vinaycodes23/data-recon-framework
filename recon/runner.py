@@ -12,14 +12,25 @@ import json
 import os
 import threading
 import uuid
-from concurrent.futures import ThreadPoolExecutor
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 from sqlalchemy import (
-    Column, Engine, Float, Integer, MetaData, String, Table, Text, create_engine, insert, select,
+    Column,
+    Engine,
+    Float,
+    Integer,
+    MetaData,
+    String,
+    Table,
+    Text,
+    create_engine,
+    insert,
+    select,
 )
 
 from recon.config import Suite, load_suite
@@ -125,16 +136,29 @@ class SuiteRun:
 
 
 def run_suite(
-    suite_or_path: Suite | str | Path, only: list[str] | None = None, workers: int = 4, save: bool = True
+    suite_or_path: Suite | str | Path,
+    only: list[str] | None = None,
+    workers: int = 4,
+    save: bool = True,
+    on_result: Callable[[TestResult], None] | None = None,
 ) -> SuiteRun:
-    """Run enabled tests of a suite in a thread pool; optionally write reports and history."""
+    """Run enabled tests of a suite in a thread pool; optionally write reports and history.
+
+    ``on_result`` is called (from the calling thread) as each test finishes, for progress UIs.
+    """
     suite = suite_or_path if isinstance(suite_or_path, Suite) else load_suite(suite_or_path)
     tests = suite.enabled_tests(only)
-    now = dt.datetime.now(dt.timezone.utc)
-    t0 = dt.datetime.now(dt.timezone.utc)
+    now = dt.datetime.now(dt.UTC)
+    t0 = dt.datetime.now(dt.UTC)
     with ThreadPoolExecutor(max_workers=max(1, min(workers, len(tests) or 1))) as pool:
-        results = list(pool.map(run_test, tests))
-    end = dt.datetime.now(dt.timezone.utc)
+        futures = {pool.submit(run_test, t): i for i, t in enumerate(tests)}
+        done: dict[int, TestResult] = {}
+        for fut in as_completed(futures):
+            done[futures[fut]] = fut.result()
+            if on_result:
+                on_result(done[futures[fut]])
+        results = [done[i] for i in range(len(tests))]
+    end = dt.datetime.now(dt.UTC)
     run = SuiteRun(
         suite=suite.suite, description=suite.description, started_at=now.isoformat(),
         finished_at=end.isoformat(), duration_sec=(end - t0).total_seconds(), results=results,

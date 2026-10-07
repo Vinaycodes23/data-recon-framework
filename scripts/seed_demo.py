@@ -34,8 +34,8 @@ def build_source(rng: np.random.Generator) -> dict[str, pd.DataFrame]:
     first, last = rng.choice(FIRST, N_CUSTOMERS), rng.choice(LAST, N_CUSTOMERS)
     customers = pd.DataFrame({
         "customer_id": ids,
-        "name": [f"{f} {l}" for f, l in zip(first, last, strict=True)],
-        "email": [f"{f.lower()}.{l.lower()}{i}@example.com" for f, l, i in zip(first, last, ids, strict=True)],
+        "name": [f"{f} {ln}" for f, ln in zip(first, last, strict=True)],
+        "email": [f"{f.lower()}.{ln.lower()}{i}@example.com" for f, ln, i in zip(first, last, ids, strict=True)],
         "city": rng.choice(CITIES, N_CUSTOMERS),
         "signup_date": (pd.Timestamp("2020-01-01") + pd.to_timedelta(rng.integers(0, 1500, N_CUSTOMERS), unit="D")).strftime("%Y-%m-%d"),
         "credit_limit": rng.integers(1, 20, N_CUSTOMERS) * 500,

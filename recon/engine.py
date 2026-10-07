@@ -565,7 +565,7 @@ def compare_frames(cfg: TestConfig, source: pd.DataFrame, target: pd.DataFrame) 
 
 def run_test(cfg: TestConfig, source_df: pd.DataFrame | None = None, target_df: pd.DataFrame | None = None) -> TestResult:
     """Load both sides (unless frames are supplied) and compare. Never raises."""
-    started = dt.datetime.now(dt.timezone.utc)
+    started = dt.datetime.now(dt.UTC)
     t0 = time.perf_counter()
     res = TestResult(name=cfg.name, started_at=started.isoformat(), samples=_empty_samples())
     try:

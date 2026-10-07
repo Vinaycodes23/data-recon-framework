@@ -1,7 +1,13 @@
 import pytest
 
 from recon.config import (
-    ConfigError, Aggregate, TestConfig, load_suite, resolve_env, save_suite, suite_from_dict,
+    Aggregate,
+    ConfigError,
+    TestConfig,
+    load_suite,
+    resolve_env,
+    save_suite,
+    suite_from_dict,
 )
 
 SUITE = {

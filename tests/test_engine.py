@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from recon.config import Aggregate, Options, Thresholds, TestConfig
-from recon.engine import ERROR, FAIL, PASS, TestResult, compare_frames, run_test
+from recon.config import Aggregate, Options, TestConfig, Thresholds
+from recon.engine import ERROR, FAIL, PASS, TestResult, run_test
 
 
 def cfg(**kw):

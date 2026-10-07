@@ -3,8 +3,8 @@
 from pathlib import Path
 
 import pytest
-
 import seed_demo
+
 from recon import run_suite
 
 ROOT = Path(__file__).resolve().parents[1]
