@@ -6,7 +6,7 @@
 
 ![Demo: run the demo suite and open the results](docs/demo.gif)
 
-**Live demo:** _coming soon_ <!-- replace with your https://<app-name>.streamlit.app URL after deploying -->
+**Live demo:** https://data-recon-framework-4eec37yqjqnvmygqtcuhqr.streamlit.app
 
 Compare a **source** dataset against a **target** dataset (a legacy DB vs. a new warehouse after a migration, say) and find missing rows, extra rows, duplicate keys, value mismatches, schema drift and aggregate drift. Define tests in YAML, run them from a CLI, Streamlit app, REST API or Airflow, and get a self-contained HTML report plus a run history. It runs fully on a laptop with seeded demo data; the connector design supports SQLite, Postgres, SQL Server, Snowflake, Redshift, S3 files, Salesforce and DynamoDB in production.
 
